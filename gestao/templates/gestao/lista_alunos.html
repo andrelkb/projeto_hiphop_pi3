@@ -24,6 +24,10 @@
     <div class="card shadow border-0 p-4 mb-5 bg-white" style="border-radius: 12px;">
         <h4 class="titulo-painel mb-4">Painel de Gestão: Lista de Alunos</h4>
 
+        <div class="mb-4">
+            <input type="text" id="campoBusca" class="form-control form-control-lg border-primary shadow-sm" placeholder="🔍 Buscar aluno por nome...">
+        </div>
+
         <table class="table table-hover align-middle">
             <thead class="cor-azul-hiphop">
                 <tr>
@@ -37,8 +41,8 @@
             </thead>
             <tbody>
                 {% for aluno in alunos %}
-                <tr>
-                    <td class="fw-bold text-dark">{{ aluno.nome }}</td>
+                <tr class="aluno-row">
+                    <td class="fw-bold text-dark nome-aluno-celula">{{ aluno.nome }}</td>
                     <td class="text-muted">{{ aluno.telefone }}</td>
                     <td>
                         {% for oficina in aluno.oficinas.all %}
@@ -68,6 +72,24 @@
         </table>
     </div>
 </div>
+
+<script>
+    document.getElementById('campoBusca').addEventListener('keyup', function() {
+        let textoBusca = this.value.toLowerCase();
+        let linhasAlunos = document.querySelectorAll('.aluno-row');
+
+        linhasAlunos.forEach(function(linha) {
+            // Busca o texto apenas dentro da coluna do nome do aluno
+            let nomeAluno = linha.querySelector('.nome-aluno-celula').textContent.toLowerCase();
+            
+            if (nomeAluno.includes(textoBusca)) {
+                linha.style.display = ''; // Mostra a linha
+            } else {
+                linha.style.display = 'none'; // Esconde a linha
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
