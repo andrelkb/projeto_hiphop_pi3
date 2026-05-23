@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Fazer Chamada - Casa do Hip Hop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <h2 class="mb-4">Registro de Frequência Diária</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="">
+                <div class="row align-items-end">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Selecione a Oficina:</label>
+                        <select name="oficina" class="form-select" required>
+                            <option value="">--- Escolha a modalidade ---</option>
+                            {% for of in oficinas %}
+                            <option value="{{ of.id }}" {% if oficina_selecionada.id == of.id %}selected{% endif %}>
+                                {{ of.nome }} (Prof. {{ of.professor }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">Carregar Turma</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if oficina_selecionada %}
+    <form method="POST" action="">
+        {% csrf_token %}
+        <input type="hidden" name="oficina_id" value="{{ oficina_selecionada.id }}">
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Diário de Classe: {{ oficina_selecionada.nome }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4 w-25">
+                    <label class="form-label fw-bold">Data da Aula:</label>
+                    <input type="date" name="data" class="form-control" value="{{ hoje }}" required>
+                </div>
+
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 15%">Presença</th>
+                            <th>Nome do Aluno</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for aluno in alunos %}
+                        <tr>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input fs-4" type="checkbox" name="presentes" value="{{ aluno.id }}" checked>
+                                </div>
+                            </td>
+                            <td class="align-middle fs-5">{{ aluno.nome }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center text-muted py-4">Nenhum aluno matriculado nesta oficina no momento.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-end">
+                <button type="submit" class="btn btn-success btn-lg px-5">Salvar Presenças no Banco</button>
+            </div>
+        </div>
+    </form>
+    {% endif %}
+
+    <div class="text-center mt-5 fw-bold mb-5">
+        PAZ • AMOR • <span class="text-danger">UNIÃO</span> • DIVERSÃO
+    </div>
+</div>
+</body>
+</html>
