@@ -3,6 +3,10 @@ from django.views.generic import ListView
 from datetime import date
 from .models import Aluno, Oficina, Presenca
 
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
 # --- Nossa listagem antiga ---
 class AlunoListView(ListView):
     model = Aluno
@@ -53,3 +57,27 @@ def fazer_chamada(request):
         'hoje': date.today().strftime('%Y-%m-%d')
     }
     return render(request, 'gestao/fazer_chamada.html', context)
+
+
+
+@csrf_exempt
+def registrar_presenca_iot(request):
+    """
+    API invisível para receber dados do hardware (Simulador ou Celular NFC).
+    """
+    if request.method == 'POST':
+        try:
+            # Pega o pacote de dados que o hardware enviou
+            dados = json.loads(request.body)
+            identificador = dados.get('identificador', '')
+
+            # Aqui você vê no terminal o que o hardware mandou
+            print(f"BIP! O hardware enviou o ID: {identificador}")
+
+            # Simulando o sucesso do registro
+            return JsonResponse({"status": "sucesso", "mensagem": f"Presença registrada para o ID {identificador}!"})
+            
+        except json.JSONDecodeError:
+            return JsonResponse({"status": "erro", "mensagem": "Formato de dados inválido."}, status=400)
+            
+    return JsonResponse({"status": "erro", "mensagem": "Apenas requisições POST são aceitas."}, status=405)
