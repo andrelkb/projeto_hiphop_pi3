@@ -1,0 +1,34 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}{{ title }} | Gestão Casa do Hip Hop{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        /* Ajuste de Contraste para Acessibilidade (WCAG) */
+        
+        /* Cabeçalho principal: Fundo Preto de alto contraste */
+        #header { background-color: #111111 !important; } 
+        
+        /* Faixa de navegação (breadcrumbs) */
+        div.breadcrumbs { background-color: #333333 !important; color: #ffffff !important; }
+        
+        /* Títulos das tabelas e blocos: Azul oficial da Casa do Hip Hop */
+        .module h2, .module caption, .inline-group h2 { background-color: #0055b3 !important; }
+        
+        /* Botões de Salvar/Adicionar: Azul oficial */
+        .button, input[type=submit], input[type=button], .submit-row input, a.button { 
+            background-color: #0055b3 !important; 
+        }
+        .button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+            background-color: #003d82 !important; /* Azul mais escuro ao passar o mouse */
+        }
+
+        /* Links em geral: Azul escuro para destacar no fundo branco */
+        a:link, a:visited { color: #004494; font-weight: bold; }
+    </style>
+{% endblock %}
+
+{% block branding %}
+    <h1 id="site-name"><a href="{% url 'admin:index' %}">Painel de Administração - Casa do Hip Hop</a></h1>
+{% endblock %}
