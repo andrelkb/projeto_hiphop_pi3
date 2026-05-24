@@ -19,14 +19,12 @@ def fazer_chamada(request):
     oficina_selecionada = None
     alunos = []
 
-    # Se o professor selecionou uma oficina no menu dropdown
     if 'oficina' in request.GET:
         oficina_id = request.GET.get('oficina')
         if oficina_id:
             oficina_selecionada = Oficina.objects.get(id=oficina_id)
             alunos = Aluno.objects.filter(oficinas=oficina_selecionada)
 
-    # Se o professor clicou em "Salvar Presenças"
     if request.method == 'POST':
         oficina_id = request.POST.get('oficina_id')
         data_aula = request.POST.get('data')
@@ -53,37 +51,41 @@ def fazer_chamada(request):
     }
     return render(request, 'gestao/fazer_chamada.html', context)
 
-# --- Nossa API IoT (Integrada com o Banco de Dados) ---
+# --- Nossa API IoT (Corrigida e integrada ao banco) ---
 @csrf_exempt
 def registrar_presenca_iot(request):
-    """
-    API para receber o ID do cartão, buscar o aluno no banco e salvar a presença.
-    """
     if request.method == 'POST':
         try:
             dados = json.loads(request.body)
             identificador = dados.get('identificador', '')
 
-            # Tenta encontrar o aluno pelo CPF (identificador)
             try:
+                # Busca o aluno pelo CPF
                 aluno = Aluno.objects.get(cpf=identificador)
                 
-                # Registra a presença no banco de dados com presente=True
+                # Busca a primeira oficina vinculada ao aluno para evitar o erro de IntegrityError
+                oficina_padrao = aluno.oficinas.first() 
+                
+                if not oficina_padrao:
+                    return JsonResponse({"status": "erro", "mensagem": "Aluno não matriculado em oficinas."}, status=400)
+
+                # Cria a presença vinculada obrigatoriamente à oficina
                 Presenca.objects.create(
                     aluno=aluno,
+                    oficina=oficina_padrao,
                     data=date.today(),
                     presente=True
                 )
                 
                 return JsonResponse({
                     "status": "sucesso", 
-                    "mensagem": f"Presença registrada para o aluno {aluno.nome}!"
+                    "mensagem": f"Presença registrada para {aluno.nome} na oficina {oficina_padrao.nome}!"
                 })
             
             except Aluno.DoesNotExist:
-                return JsonResponse({"status": "erro", "mensagem": "Aluno não encontrado com este identificador."}, status=404)
+                return JsonResponse({"status": "erro", "mensagem": "Aluno não encontrado."}, status=404)
 
         except json.JSONDecodeError:
-            return JsonResponse({"status": "erro", "mensagem": "Formato de dados inválido."}, status=400)
+            return JsonResponse({"status": "erro", "mensagem": "Formato JSON inválido."}, status=400)
             
-    return JsonResponse({"status": "erro", "mensagem": "Apenas requisições POST são aceitas."}, status=405)
+    return JsonResponse({"status": "erro", "mensagem": "Método não permitido."}, status=405)
